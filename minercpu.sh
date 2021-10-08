@@ -38,8 +38,9 @@ cmd=${1:-}
 
 case "${cmd}" in
   update)
-    curl https://raw.githubusercontent.com/matti/minercpu/main/minercpu.sh -o /root/minercpu.sh
-    chmod +x /root/minercpu.sh
+    curl https://raw.githubusercontent.com/matti/minercpu/main/minercpu.sh -o /root/minercpu.new
+    chmod +x /root/minercpu.new
+    diff /root/minercpu.sh /root/minercpu.new
   ;;
   install)
     for package in libjansson-dev libnuma-dev screen; do
