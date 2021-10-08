@@ -17,7 +17,7 @@ while true; do
     _log "using $pool"
     for (( i=1; i<=$MINERCPU_RETRIES; i++ )); do
       set +e
-        echo /root/cpuminer/cpuminer-${MINERCPU_ARCH} \
+        /root/cpuminer/cpuminer-${MINERCPU_ARCH} \
           -a gr \
           -o $pool \
           -u $MINERCPU_WALLET.$MINERCPU_WORKER \
