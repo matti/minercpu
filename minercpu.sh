@@ -13,6 +13,7 @@ MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
 MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
 MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
 MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
+MINERCPU_REBOOT=${MINERCPU_REBOOT:-no}
 
 echo """
 export MINERCPU_CPUMINER='${MINERCPU_CPUMINER}'
@@ -166,6 +167,10 @@ case "${cmd}" in
           sleep 5
         done
       done
+
+      if [ "$MINERCPU_REBOOT" = "yes" ]; then
+        curl --max-time 3 --silent -o /dev/null --fail -L 1.1.1.1 || reboot
+      fi
     done
   ;;
 esac
