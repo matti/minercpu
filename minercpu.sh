@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -f "/root/minercpu.env" ]; then
+  eval $(cat /root/minercpu.env)
+fi
+
 MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
-MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcp://rtm.suprnova.cc:6273 stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://r-pool.net:3032}
+MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://rtm.suprnova.cc:6273 stratum+tcp://r-pool.net:3032}
 MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
 MINERCPU_ARCH=${MINERCPU_ARCH:-zen2}
 MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
 MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
 MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
 MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
+
+echo """
+MINERCPU_CPUMINER=${MINERCPU_CPUMINER}
+MINERCPU_POOLS=${MINERCPU_POOLS}
+MINERCPU_RETRIES=${MINERCPU_RETRIES}
+MINERCPU_ARCH=${MINERCPU_ARCH}
+MINERCPU_WALLET=${MINERCPU_WALLET}
+MINERCPU_WORKER=${MINERCPU_WORKER}
+MINERCPU_THREADS=${MINERCPU_THREADS}
+MINERCPU_PRECMD=${MINERCPU_PRECMD}
+""" > /root/minercpu.env
 
 _term() {
   exit 0
