@@ -169,7 +169,7 @@ case "${cmd}" in
       done
 
       if [ "$MINERCPU_REBOOT" = "yes" ]; then
-        curl --max-time 3 --silent -o /dev/null --fail -L 1.1.1.1 || reboot
+        curl --max-time 3 --silent -o /dev/null --fail -L 1.1.1.1 || /sbin/reboot
       fi
     done
   ;;
