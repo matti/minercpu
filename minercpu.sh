@@ -49,7 +49,7 @@ case "${cmd}" in
     done
   ;;
   crontab)
-    old_crontab=$(crontab -l)
+    old_crontab=$(crontab -l || :)
 
     case $old_crontab in
       *minercpu.sh*)
