@@ -1,0 +1,3 @@
+# minercpu
+
+cpuminer wrapper
