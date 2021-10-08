@@ -44,6 +44,8 @@ case "${cmd}" in
     diff /root/minercpu.sh /root/minercpu.new
   ;;
   install)
+    export PAGER=""
+
     for package in libjansson-dev libnuma-dev screen; do
       dpkg -l $package || apt update && apt install -y $package
     done
