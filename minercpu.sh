@@ -50,7 +50,7 @@ case "${cmd}" in
       dpkg -l $package || apt update && apt install -y $package
     done
 
-    if [ ! -e "${MINERCPU_CPUMINER}" ];
+    if [ ! -e "${MINERCPU_CPUMINER}" ]; then
       curl -o /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz https://github.com/WyvernTKC/cpuminer-gr-avx2/releases/download/1.1.9/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
       tar -xvof /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
       mv cpuminer-gr-1.1.9-x86_64_ubuntu_20_04 "${MINERCPU_CPUMINER}"
