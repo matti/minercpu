@@ -91,7 +91,7 @@ case "${cmd}" in
       "AMD Ryzen 9 5950X 16-Core Processor")
         case $cmd in
           arch)
-            echo "zen2"
+            echo "zen3"
           ;;
           tune)
         echo """0 0 2 2 0 0
