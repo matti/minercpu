@@ -8,7 +8,7 @@ fi
 MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
 MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://rtm.suprnova.cc:6273 stratum+tcp://r-pool.net:3032}
 MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
-MINERCPU_ARCH=${MINERCPU_ARCH:-zen2}
+MINERCPU_ARCH=${MINERCPU_ARCH:-$($0 arch)}
 MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
 MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
 MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
@@ -87,10 +87,15 @@ case "${cmd}" in
       ;;
     esac
   ;;
-  tune)
+  tune|arch)
     case $($0 cpu) in
       "AMD Ryzen 5 4600G with Radeon Graphics")
-        echo """0 0 0 0 0 0
+        case $cmd in
+          arch)
+            echo "zen2"
+          ;;
+          tune)
+            echo """0 0 0 0 0 0
 0 0 0 0 0 0
 0 1 1 1 0 0
 1 0 0 1 0 0
@@ -110,8 +115,15 @@ case "${cmd}" in
 0 0 0 0 0 0
 0 0 0 0 0 0
 0 0 0 0 0 0"""
+          ;;
+        esac
       ;;
       "AMD Ryzen Threadripper 3960X 24-Core Processor")
+        case $cmd in
+          arch)
+            echo "zen2"
+          ;;
+          tune)
         echo """0 0 2 2 0 0
 0 0 1 1 2 0
 0 2 2 2 0 0
@@ -132,8 +144,15 @@ case "${cmd}" in
 2 0 0 0 2 0
 2 2 0 0 0 0
 1 2 0 0 1 0"""
+          ;;
+        esac
       ;;
       "AMD Ryzen 9 5950X 16-Core Processor")
+        case $cmd in
+          arch)
+            echo "zen2"
+          ;;
+          tune)
         echo """0 0 2 2 0 0
 0 0 2 2 1 0
 0 2 2 2 0 0
@@ -154,8 +173,15 @@ case "${cmd}" in
 1 0 0 0 1 0
 1 2 0 0 0 0
 1 2 0 0 1 0"""
+          ;;
+        esac
       ;;
       "AMD Ryzen 5 3600 6-Core Processor")
+        case $cmd in
+          arch)
+            echo "zen2"
+          ;;
+          tune)
         echo """0 0 2 2 0 0
 0 0 2 2 1 0
 0 2 2 2 0 0
@@ -176,6 +202,19 @@ case "${cmd}" in
 1 0 0 0 2 0
 2 2 0 0 0 0
 2 2 0 0 1 0"""
+          ;;
+        esac
+      ;;
+      *)
+        case $cmd in
+          arch)
+            echo "zen2"
+          ;;
+          tune)
+            echo ""
+          ;;
+        esac
+      ;;
     esac
   ;;
   *)
