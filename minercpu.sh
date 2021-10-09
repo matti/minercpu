@@ -30,7 +30,7 @@ case "${cmd}" in
   tune|arch)
     cpu=$($0 cpu)
     case "$cpu" in
-      "AMD Ryzen 5 4600G with Radeon Graphics")
+      "AMD Ryzen 9 3900 12-Core Processor")
         case $cmd in
           arch)
             echo "zen2"
