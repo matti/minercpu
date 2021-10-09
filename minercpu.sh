@@ -83,6 +83,28 @@ case "${cmd}" in
   ;;
   tune)
     case $($0 cpu) in
+      "AMD Ryzen 5 4600G with Radeon Graphics")
+        echo """0 0 0 0 0 0
+0 0 0 0 0 0
+0 1 1 1 0 0
+1 0 0 1 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+1 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+1 0 0 1 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 1 0 0 0 0
+0 0 0 0 0 0
+1 1 2 0 0 0
+0 1 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0"""
+      ;;
       "AMD Ryzen Threadripper 3960X 24-Core Processor")
         echo """0 0 2 2 0 0
 0 0 1 1 2 0
