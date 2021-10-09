@@ -1,60 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -f "/root/minercpu.env" ]; then
-  eval $(cat /root/minercpu.env)
-fi
-
-MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
-MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://rtm.suprnova.cc:6273 stratum+tcp://r-pool.net:3032}
-MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
-MINERCPU_ARCH=${MINERCPU_ARCH:-$($0 arch)}
-MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
-MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
-MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
-MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
-MINERCPU_REBOOT=${MINERCPU_REBOOT:-no}
-
-echo """
-export MINERCPU_CPUMINER='${MINERCPU_CPUMINER}'
-export MINERCPU_POOLS='${MINERCPU_POOLS}'
-export MINERCPU_RETRIES='${MINERCPU_RETRIES}'
-export MINERCPU_ARCH='${MINERCPU_ARCH}'
-export MINERCPU_WALLET='${MINERCPU_WALLET}'
-export MINERCPU_WORKER='${MINERCPU_WORKER}'
-export MINERCPU_THREADS='${MINERCPU_THREADS}'
-export MINERCPU_PRECMD='${MINERCPU_PRECMD}'
-""" > /root/minercpu.env
-
-_term() {
-  exit 0
-}
-trap _term TERM INT
-
-_log() {
-  echo "$(date) $@" | tee /tmp/minercpu.log
-}
-
 cmd=${1:-}
-
+handled=yes
 case "${cmd}" in
   update)
     curl https://raw.githubusercontent.com/matti/minercpu/main/minercpu.sh -o /root/minercpu.new
     chmod +x /root/minercpu.new
     diff /root/minercpu.sh /root/minercpu.new
-  ;;
-  install)
-    export PAGER=""
-
-    for package in libjansson-dev libnuma-dev screen; do
-      dpkg -l $package || apt update && apt install -y $package
-    done
-
-    if [ ! -e "${MINERCPU_CPUMINER}" ]; then
-      curl -L --fail -o /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz https://github.com/WyvernTKC/cpuminer-gr-avx2/releases/download/1.1.9/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
-      tar -xvof /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
-      mv cpuminer-gr-1.1.9-x86_64_ubuntu_20_04 "${MINERCPU_CPUMINER}"
-    fi
   ;;
   crontab)
     if crontab -l; then
@@ -74,21 +27,9 @@ case "${cmd}" in
   cpu)
     cat /proc/cpuinfo | grep "model name" | uniq | cut -d: -f2 | xargs
   ;;
-  run|daemon)
-    $0 install
-    $0 crontab
-    [ ! -f /root/tune_config ] && $0 tune > /root/tune_config
-    case "${cmd}" in
-      run)
-        exec screen -mS minercpu /root/minercpu.sh
-      ;;
-      daemon)
-        screen -dmS minercpu /root/minercpu.sh
-      ;;
-    esac
-  ;;
   tune|arch)
-    case $($0 cpu) in
+    cpu=$($0 cpu)
+    case "$cpu" in
       "AMD Ryzen 5 4600G with Radeon Graphics")
         case $cmd in
           arch)
@@ -208,12 +149,91 @@ case "${cmd}" in
       *)
         case $cmd in
           arch)
-            echo "zen2"
+            case $cpu in
+              *AMD*)
+                echo "zen2"
+              ;;
+              *Intel*)
+                echo "avx2"
+              ;;
+              *)
+                echo "unknown"
+              ;;
+            esac
           ;;
           tune)
             echo ""
           ;;
         esac
+      ;;
+    esac
+  ;;
+  *)
+    handled=no
+  ;;
+esac
+[ "$handled" = "yes" ] && exit 0
+
+if [ -f "/root/minercpu.env" ]; then
+  eval $(cat /root/minercpu.env)
+fi
+
+
+MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
+MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://rtm.suprnova.cc:6273 stratum+tcp://r-pool.net:3032}
+MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
+MINERCPU_ARCH=${MINERCPU_ARCH:-$(/root/minercpu.sh arch)}
+MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
+MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
+MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
+MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
+MINERCPU_REBOOT=${MINERCPU_REBOOT:-no}
+
+echo """
+export MINERCPU_CPUMINER='${MINERCPU_CPUMINER}'
+export MINERCPU_POOLS='${MINERCPU_POOLS}'
+export MINERCPU_RETRIES='${MINERCPU_RETRIES}'
+export MINERCPU_ARCH='${MINERCPU_ARCH}'
+export MINERCPU_WALLET='${MINERCPU_WALLET}'
+export MINERCPU_WORKER='${MINERCPU_WORKER}'
+export MINERCPU_THREADS='${MINERCPU_THREADS}'
+export MINERCPU_PRECMD='${MINERCPU_PRECMD}'
+""" > /root/minercpu.env
+
+_term() {
+  exit 0
+}
+trap _term TERM INT
+
+_log() {
+  echo "$(date) $@" | tee /tmp/minercpu.log
+}
+
+case "${cmd}" in
+  install)
+    export PAGER=""
+
+    for package in libjansson-dev libnuma-dev screen; do
+      dpkg -l $package || apt update && apt install -y $package
+    done
+
+    if [ ! -e "${MINERCPU_CPUMINER}" ]; then
+      curl -L --fail -o /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz https://github.com/WyvernTKC/cpuminer-gr-avx2/releases/download/1.1.9/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
+      tar -xvof /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
+      mv cpuminer-gr-1.1.9-x86_64_ubuntu_20_04 "${MINERCPU_CPUMINER}"
+    fi
+  ;;
+  run|daemon)
+    $0 install
+    $0 crontab
+    [ ! -f /root/tune_config ] && $0 tune > /root/tune_config
+
+    case "${cmd}" in
+      run)
+        exec screen -mS minercpu /root/minercpu.sh
+      ;;
+      daemon)
+        screen -dmS minercpu /root/minercpu.sh
       ;;
     esac
   ;;
