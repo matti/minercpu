@@ -58,6 +58,7 @@ case "${cmd}" in
 2 2 0 0 0 0"""
           ;;
         esac
+      ;;
       "AMD Ryzen 9 3900 12-Core Processor")
         case $cmd in
           arch)
@@ -263,7 +264,7 @@ _term() {
 trap _term TERM INT
 
 _log() {
-  echo "$(date) $@" | tee -a /tmp/minercpu.log
+  echo "$(date) $@" | tee -a /root/minercpu.log
 }
 
 case "${cmd}" in
@@ -300,6 +301,22 @@ case "${cmd}" in
   *)
     $MINERCPU_PRECMD
 
+    (
+      while true; do
+        set +e
+          summary_output=$(echo "summary" | nc localhost 4048 | tr -d '\0')
+        set -e
+        if [ "$summary_output" != "" ]; then
+          hashes=$(echo $summary_output | cut -d';' -f7 | cut -d'=' -f2)
+          temp=$(echo $summary_output | cut -d';' -f14 | cut -d'=' -f2)
+          mhz=$(echo $summary_output | cut -d';' -f16 | cut -d'=' -f2)
+          echo "-- minercpu -- hashes: ${hashes} temp: $temp MHz: $mhz"
+        fi
+
+        sleep 10
+      done
+    ) &
+
     while true; do
       for pool in $MINERCPU_POOLS; do
         _log "using $pool"
@@ -313,7 +330,8 @@ case "${cmd}" in
               --retries=0 \
               --timeout=60 \
               --threads=$MINERCPU_THREADS \
-              --tune-full
+              --tune-full \
+              --api-bind=127.0.0.1:4048
           set -e
 
           _log "pool failed ($i / $MINERCPU_RETRIES) $pool"
@@ -327,4 +345,3 @@ case "${cmd}" in
     done
   ;;
 esac
-
