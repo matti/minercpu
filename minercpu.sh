@@ -30,6 +30,34 @@ case "${cmd}" in
   tune|arch)
     cpu=$($0 cpu)
     case "$cpu" in
+      "Intel(R) Core(TM) i5-10400F CPU @ 2.90GHz")
+        case $cmd in
+          arch)
+            echo "avx2"
+          ;;
+          tune)
+            echo """0 0 0 0 0 0
+0 0 2 1 0 0
+0 2 2 1 0 0
+2 0 2 1 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 2 0 1 0 0
+2 0 0 1 0 0
+2 2 0 1 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+1 0 0 0 0 0
+0 2 2 0 0 0
+2 0 2 0 0 0
+2 2 2 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+2 2 0 0 0 0"""
+          ;;
+        esac
       "AMD Ryzen 9 3900 12-Core Processor")
         case $cmd in
           arch)
