@@ -239,6 +239,9 @@ _log() {
 }
 
 case "${cmd}" in
+  version)
+    echo "0.0.1"
+  ;;
   install)
     export PAGER=""
 
