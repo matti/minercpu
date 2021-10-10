@@ -309,8 +309,8 @@ case "${cmd}" in
         if [ "$summary_output" != "" ]; then
           hashes=$(echo $summary_output | cut -d';' -f7 | cut -d'=' -f2)
           temp=$(echo $summary_output | cut -d';' -f14 | cut -d'=' -f2)
-          mhz=$(echo $summary_output | cut -d';' -f16 | cut -d'=' -f2)
-          echo "-- minercpu -- hashes: ${hashes} temp: $temp MHz: $mhz"
+          freq=$(echo $summary_output | cut -d';' -f16 | cut -d'=' -f2)
+          echo "-- minercpu -- hashes: ${hashes} temp: ${temp}c freq: $freq"
         fi
 
         sleep 10
