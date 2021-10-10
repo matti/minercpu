@@ -235,7 +235,7 @@ _term() {
 trap _term TERM INT
 
 _log() {
-  echo "$(date) $@" | tee /tmp/minercpu.log
+  echo "$(date) $@" | tee -a /tmp/minercpu.log
 }
 
 case "${cmd}" in
