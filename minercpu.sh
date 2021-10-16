@@ -123,26 +123,46 @@ case "${cmd}" in
             echo "zen2"
           ;;
           tune)
-        echo """0 0 2 2 0 0
-0 0 1 1 2 0
-0 2 2 2 0 0
-2 0 2 2 0 0
-0 0 0 2 2 0
-0 2 0 2 0 0
-2 0 0 2 0 0
-0 2 0 2 1 0
-2 0 0 2 1 0
-2 2 0 2 0 0
-0 0 2 0 2 0
-0 2 2 0 0 0
-1 0 2 0 0 0
-0 2 2 0 1 0
-2 0 2 0 1 0
-2 2 2 0 0 0
-0 2 0 0 2 0
-2 0 0 0 2 0
-2 2 0 0 0 0
-1 2 0 0 1 0"""
+        echo """0 0 2 0 0 1 0 1
+0 0 2 0 0 1 0 2
+0 0 2 1 2 0 0 0
+0 0 2 1 2 0 0 0
+0 2 2 2 0 0 1 0
+0 2 2 2 0 0 1 0
+2 0 2 2 0 0 1 0
+2 0 2 2 0 0 1 0
+0 0 0 2 2 0 0 0
+0 0 0 2 2 0 0 0
+0 2 0 2 0 0 1 0
+0 2 0 2 0 0 1 0
+0 0 0 0 0 1 0 0
+2 0 0 2 0 0 1 0
+0 2 0 1 2 0 0 0
+0 1 0 1 2 0 0 0
+2 0 0 1 2 0 0 1
+1 0 0 1 2 0 0 0
+2 2 0 2 0 0 1 0
+2 2 0 2 0 0 0 0
+0 0 2 0 2 0 0 0
+0 0 2 0 2 0 0 0
+0 2 2 0 0 0 1 0
+0 2 2 0 0 0 1 0
+2 0 2 0 0 0 1 0
+2 0 2 0 0 0 1 0
+0 0 2 0 2 0 0 0
+0 2 1 0 2 0 0 0
+0 0 2 0 2 0 0 0
+0 0 2 0 2 0 0 0
+2 2 2 0 0 0 1 0
+2 2 2 0 0 0 1 0
+0 2 0 0 2 0 0 0
+0 2 0 0 2 0 0 0
+2 0 0 0 2 0 0 0
+2 0 0 0 2 0 0 0
+2 2 0 0 0 0 1 0
+2 2 0 0 0 0 1 0
+0 0 0 0 2 0 0 0
+0 0 0 0 2 0 0 0"""
           ;;
         esac
       ;;
@@ -238,10 +258,10 @@ fi
 
 
 MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
-MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://stratum-eu.rplant.xyz:17056 stratum+tcp://rtm.suprnova.cc:6273 stratum+tcp://r-pool.net:3032}
+MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://eu.flockpool.com:5555}
 MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
 MINERCPU_ARCH=${MINERCPU_ARCH:-$(/root/minercpu.sh arch)}
-MINERCPU_WALLET=${MINERCPU_WALLET:-RVmmg18q53WyAzPCV3v3JsGYoD4fswnjiJ}
+MINERCPU_WALLET=${MINERCPU_WALLET:-RQP3wfYx9ob6xyhs2TQ6T3FngH9xjF7XzA}
 MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
 MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
 MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
@@ -269,7 +289,26 @@ _log() {
 
 case "${cmd}" in
   version)
-    echo "0.0.1"
+    echo "0.1.0"
+  ;;
+  uninstall)
+    set +e
+      screen_id=$(screen -ls | grep .minercpu | cut -f 2 | cut -d. -f1)
+      if [ "$screen_id" != "" ]; then
+        screen -XS "$screen_id" quit
+      fi
+
+      rm -rf "${MINERCPU_CPUMINER}"
+      rm -rf /root/minercpu.env
+      rm -rf /root/minercpu.log
+      rm -rf /root/minercpu.sh
+      rm -rf /root/tune_config
+      crontab -l | grep -v "minercpu" | crontab
+    set -e
+  ;;
+  reinstall)
+    rm -rf "${MINERCPU_CPUMINER}"
+    exec $0 install
   ;;
   install)
     export PAGER=""
@@ -279,9 +318,9 @@ case "${cmd}" in
     done
 
     if [ ! -e "${MINERCPU_CPUMINER}" ]; then
-      curl -L --fail -o /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz https://github.com/WyvernTKC/cpuminer-gr-avx2/releases/download/1.1.9/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
-      tar -xvof /tmp/cpuminer-gr-1.1.9-x86_64_ubuntu_20_04.tar.gz
-      mv cpuminer-gr-1.1.9-x86_64_ubuntu_20_04 "${MINERCPU_CPUMINER}"
+      curl -L --fail -o /tmp/cpuminer.tar.gz https://github.com/WyvernTKC/cpuminer-gr-avx2/releases/download/1.2.2/cpuminer-gr-1.2.2-x86_64_linux.tar.gz
+      tar -xvof /tmp/cpuminer.tar.gz
+      mv cpuminer-gr-1.2.2-x86_64_linux "${MINERCPU_CPUMINER}"
     fi
   ;;
   run|daemon)
@@ -322,7 +361,7 @@ case "${cmd}" in
         _log "using $pool"
         for (( i=1; i<=$MINERCPU_RETRIES; i++ )); do
           set +e
-            $MINERCPU_CPUMINER/cpuminer-${MINERCPU_ARCH} \
+            $MINERCPU_CPUMINER/binaries/cpuminer-${MINERCPU_ARCH} \
               -a gr \
               -o $pool \
               -u $MINERCPU_WALLET.$MINERCPU_WORKER \
