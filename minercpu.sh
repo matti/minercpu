@@ -9,7 +9,10 @@ case "${cmd}" in
     chmod +x /root/minercpu.new
     diff /root/minercpu.sh /root/minercpu.new
   ;;
-  crontab)
+  stop)
+
+  ;;
+  crontab:add)
     if crontab -l; then
       old_crontab=$(crontab -l)
     else
@@ -23,6 +26,9 @@ case "${cmd}" in
     esac
 
     printf "${old_crontab}\n@reboot screen -dmS minercpu /root/minercpu.sh\n" | crontab
+  ;;
+  crontab:remove)
+    crontab -l | grep -v "minercpu" | crontab
   ;;
   cpu)
     cat /proc/cpuinfo | grep "model name" | uniq | cut -d: -f2 | xargs
@@ -438,21 +444,25 @@ _log() {
 
 case "${cmd}" in
   version)
-    echo "0.1.0"
+    echo "0.2.1"
+  ;;
+  stop)
+    set +e
+      screen_id=$(screen -ls | grep .minercpu | cut -f 2 | cut -d. -f1)
+    set -e
+    if [ "$screen_id" != "" ]; then
+      screen -XS "$screen_id" quit
+    fi
   ;;
   uninstall)
     set +e
-      screen_id=$(screen -ls | grep .minercpu | cut -f 2 | cut -d. -f1)
-      if [ "$screen_id" != "" ]; then
-        screen -XS "$screen_id" quit
-      fi
-
+      $0 stop
+      $0 crontab:remove
       rm -rf "${MINERCPU_CPUMINER}"
       rm -rf /root/minercpu.env
       rm -rf /root/minercpu.log
       rm -rf /root/minercpu.sh
       rm -rf /root/tune_config
-      crontab -l | grep -v "minercpu" | crontab
     set -e
   ;;
   reinstall)
@@ -474,7 +484,7 @@ case "${cmd}" in
   ;;
   run|daemon)
     $0 install
-    $0 crontab
+    $0 crontab:add
     [ ! -f /root/tune_config ] && $0 tune > /root/tune_config
 
     case "${cmd}" in
