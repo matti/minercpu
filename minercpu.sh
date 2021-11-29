@@ -587,10 +587,10 @@ case "${cmd}" in
 
     case "${cmd}" in
       run)
-        exec screen -mS minercpu /root/minercpu.sh
+        exec screen -mS minercpu bash -l -c /root/minercpu.sh
       ;;
       daemon)
-        screen -dmS minercpu /root/minercpu.sh
+        screen -dmS minercpu bash -l -c /root/minercpu.sh
       ;;
     esac
   ;;
