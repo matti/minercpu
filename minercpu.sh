@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+screen_cmd="screen -dmS minercpu bash -l -c /root/minercpu.sh"
 
 cmd=${1:-}
 handled=yes
@@ -25,7 +26,9 @@ case "${cmd}" in
       ;;
     esac
 
-    printf "${old_crontab}\n@reboot screen -dmS minercpu /root/minercpu.sh\n" | crontab
+    printf "${old_crontab}\n@reboot ${screen_cmd}\n" | crontab >/dev/null
+
+    crontab -l
   ;;
   crontab:remove)
     crontab -l | grep -v "minercpu" | crontab
@@ -587,10 +590,11 @@ case "${cmd}" in
 
     case "${cmd}" in
       run)
-        exec screen -mS minercpu bash -l -c /root/minercpu.sh
+        ${screen_cmd}
+        screen -r minercpu
       ;;
       daemon)
-        screen -dmS minercpu bash -l -c /root/minercpu.sh
+        ${screen_cmd}
       ;;
     esac
   ;;
