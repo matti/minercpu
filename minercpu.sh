@@ -512,13 +512,13 @@ if [ -f "/root/minercpu.env" ]; then
   eval $(cat /root/minercpu.env)
 fi
 
-
 MINERCPU_CPUMINER=${MINERCPU_CPUMINER:-/root/cpuminer}
 MINERCPU_POOLS=${MINERCPU_POOLS:-stratum+tcps://eu.flockpool.com:5555}
 MINERCPU_RETRIES=${MINERCPU_RETRIES:-3}
 MINERCPU_ARCH=${MINERCPU_ARCH:-$(/root/minercpu.sh arch)}
 MINERCPU_WALLET=${MINERCPU_WALLET:-RQP3wfYx9ob6xyhs2TQ6T3FngH9xjF7XzA}
 MINERCPU_WORKER=${MINERCPU_WORKER:-$(hostname | cut -d'.' -f1)}
+MINERCPU_PASSWORD=${MINERCPU_PASSWORD:-${MINERCPU_WALLET}}
 MINERCPU_THREADS=${MINERCPU_THREADS:-$(nproc)}
 MINERCPU_PRECMD=${MINERCPU_PRECMD:-:}
 MINERCPU_REBOOT=${MINERCPU_REBOOT:-no}
@@ -530,6 +530,7 @@ export MINERCPU_RETRIES='${MINERCPU_RETRIES}'
 export MINERCPU_ARCH='${MINERCPU_ARCH}'
 export MINERCPU_WALLET='${MINERCPU_WALLET}'
 export MINERCPU_WORKER='${MINERCPU_WORKER}'
+export MINERCPU_PASSWORD='${MINERCPU_PASSWORD}'
 export MINERCPU_THREADS='${MINERCPU_THREADS}'
 export MINERCPU_PRECMD='${MINERCPU_PRECMD}'
 """ > /root/minercpu.env
@@ -627,6 +628,7 @@ case "${cmd}" in
               -o $pool \
               -u $MINERCPU_WALLET.$MINERCPU_WORKER \
               -d 0 \
+              --pass=$MINERCPU_PASSWORD \
               --retries=0 \
               --timeout=60 \
               --threads=$MINERCPU_THREADS \
